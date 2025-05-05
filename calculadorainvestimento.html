@@ -1,0 +1,549 @@
+
+<!--
+  Código completo da Calculadora de Juros Compostos com:
+  - Comparação entre dois cenários
+  - Aporte inicial
+  - Juros compostos com reinvestimento parcial
+  - Desconto de inflação
+  - Cálculo de Imposto de Renda regressivo
+  - Aportes variáveis
+  - Lucro líquido isolado
+  - Retirada mensal
+  - Salvar/Carregar simulações
+-->
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <title>Comparador de Juros Compostos</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/js-file-download"></script>
+  
+  <style>
+    body {
+      background-color: #121212;
+      color: #e0e0e0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      margin: 0;
+      padding: 20px;
+    }
+
+    h1, h2 {
+      color: #ffffff;
+    }
+
+    label {
+      display: block;
+      margin-top: 15px;
+      font-weight: 500;
+    }
+
+    input[type="number"] {
+      width: 100%;
+      padding: 8px;
+      margin-top: 5px;
+      background-color: #1e1e1e;
+      border: 1px solid #333;
+      color: #fff;
+      border-radius: 6px;
+      font-size: 14px;
+    }
+
+    button {
+      margin-top: 20px;
+      padding: 10px 20px;
+      background-color: #2196F3;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #1976D2;
+    }
+
+    .cenarios {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 40px;
+      margin-bottom: 20px;
+    }
+
+    .cenario {
+      flex: 1;
+      min-width: 280px;
+      padding: 15px;
+      background-color: #1e1e1e;
+      border: 1px solid #333;
+      border-radius: 8px;
+    }
+
+    .tooltip {
+      position: relative;
+      display: inline-block;
+      cursor: help;
+      color: #64b5f6;
+      font-weight: bold;
+    }
+
+    .tooltip::after {
+      content: attr(data-tooltip);
+      visibility: hidden;
+      opacity: 0;
+      width: 240px;
+      background-color: #333;
+      color: #fff;
+      text-align: left;
+      border-radius: 6px;
+      padding: 6px 8px;
+      position: absolute;
+      z-index: 1;
+      bottom: 125%;
+      left: 50%;
+      margin-left: -120px;
+      transition: opacity 0.3s;
+      font-size: 0.85em;
+    }
+
+    .tooltip:hover::after {
+      visibility: visible;
+      opacity: 1;
+    }
+
+    #resultado {
+      margin-top: 30px;
+      padding: 15px;
+      background-color: #1e1e1e;
+      border: 1px solid #333;
+      border-radius: 8px;
+      white-space: pre-line;
+    }
+  </style>
+
+
+  
+  <style>
+    body {
+      background-color: #121212;
+      color: #e0e0e0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      margin: 0;
+      padding: 20px;
+    }
+
+    h1, h2 {
+      color: #ffffff;
+    }
+
+    label {
+      display: block;
+      margin-top: 15px;
+      font-weight: 500;
+    }
+
+    input[type="number"] {
+      width: 100%;
+      padding: 8px;
+      margin-top: 5px;
+      background-color: #1e1e1e;
+      border: 1px solid #333;
+      color: #fff;
+      border-radius: 6px;
+      font-size: 14px;
+    }
+
+    button {
+      margin-top: 20px;
+      padding: 10px 20px;
+      background-color: #2196F3;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #1976D2;
+    }
+
+    .cenarios {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 40px;
+      margin-bottom: 20px;
+    }
+
+    .cenario {
+      flex: 1;
+      min-width: 280px;
+      padding: 15px;
+      background-color: #1e1e1e;
+      border: 1px solid #333;
+      border-radius: 8px;
+    }
+
+    .tooltip {
+      position: relative;
+      display: inline-block;
+      cursor: help;
+      color: #64b5f6;
+      font-weight: bold;
+    }
+
+    .tooltip::after {
+      content: attr(data-tooltip);
+      visibility: hidden;
+      opacity: 0;
+      width: 240px;
+      background-color: #333;
+      color: #fff;
+      text-align: left;
+      border-radius: 6px;
+      padding: 6px 8px;
+      position: absolute;
+      z-index: 1;
+      bottom: 125%;
+      left: 50%;
+      margin-left: -120px;
+      transition: opacity 0.3s;
+      font-size: 0.85em;
+    }
+
+    .tooltip:hover::after {
+      visibility: visible;
+      opacity: 1;
+    }
+
+    #resultado {
+      margin-top: 30px;
+      padding: 15px;
+      background-color: #1e1e1e;
+      border: 1px solid #333;
+      border-radius: 8px;
+      white-space: pre-line;
+    }
+  </style>
+
+</head>
+<style>
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 1rem;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #1f1f1f;
+    color: #e0e0e0;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.05);
+  }
+  th, td {
+    padding: 12px 15px;
+    text-align: center;
+    border-bottom: 1px solid #333;
+  }
+  th {
+    background-color: #292929;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  tr:hover {
+    background-color: #2e2e2e;
+    transition: background-color 0.3s;
+  }
+  tfoot td {
+    font-weight: bold;
+    background-color: #202020;
+  }
+  </style>
+  
+<body>
+  <h1>Comparador de Juros Compostos</h1>
+
+  
+<div class="cenarios">
+  <div class="cenario">
+    <h2>Cenário 1</h2>
+    <label>
+      Aporte Inicial (R$):
+      <span class="tooltip" data-tooltip="Valor aplicado no início da simulação.">&#9432;</span>
+    </label>
+    <input type="number" id="inicial1" value="1000">
+
+    <label>
+      Aporte Mensal (R$):
+      <span class="tooltip" data-tooltip="Valor que será investido todo mês.">&#9432;</span>
+    </label>
+    <input type="number" id="aporte1" value="1000">
+
+    <label>
+      Juros Mensal (%):
+      <span class="tooltip" data-tooltip="Taxa de juros ao mês, em percentual.">&#9432;</span>
+    </label>
+    <input type="number" id="juros1" value="1">
+
+    <label>
+      Reinvestir Lucro (%):
+      <span class="tooltip" data-tooltip="Porcentagem do lucro que será reinvestida no mês.">&#9432;</span>
+    </label>
+    <input type="number" id="reinvestir1" value="100">
+
+    <label>
+      Aumento do Aporte (% a cada 6 meses):
+      <span class="tooltip" data-tooltip="Percentual de aumento do aporte a cada 6 meses.">&#9432;</span>
+    </label>
+    <input type="number" id="aumentoAporte1" value="0">
+
+    <label>
+      Retirada Mensal (R$):
+      <span class="tooltip" data-tooltip="Valor que será retirado todo mês da aplicação.">&#9432;</span>
+    </label>
+    <input type="number" id="retirada1" value="0">
+  </div>
+
+  <div class="cenario">
+    <h2>Cenário 2</h2>
+    <label>
+      Aporte Inicial (R$):
+      <span class="tooltip" data-tooltip="Valor aplicado no início da simulação.">&#9432;</span>
+    </label>
+    <input type="number" id="inicial2" value="1000">
+
+    <label>
+      Aporte Mensal (R$):
+      <span class="tooltip" data-tooltip="Valor que será investido todo mês.">&#9432;</span>
+    </label>
+    <input type="number" id="aporte2" value="1000">
+
+    <label>
+      Juros Mensal (%):
+      <span class="tooltip" data-tooltip="Taxa de juros ao mês, em percentual.">&#9432;</span>
+    </label>
+    <input type="number" id="juros2" value="1">
+
+    <label>
+      Reinvestir Lucro (%):
+      <span class="tooltip" data-tooltip="Porcentagem do lucro que será reinvestida no mês.">&#9432;</span>
+    </label>
+    <input type="number" id="reinvestir2" value="100">
+
+    <label>
+      Aumento do Aporte (% a cada 6 meses):
+      <span class="tooltip" data-tooltip="Percentual de aumento do aporte a cada 6 meses.">&#9432;</span>
+    </label>
+    <input type="number" id="aumentoAporte2" value="0">
+
+    <label>
+      Retirada Mensal (R$):
+      <span class="tooltip" data-tooltip="Valor que será retirado todo mês da aplicação.">&#9432;</span>
+    </label>
+    <input type="number" id="retirada2" value="0">
+  </div>
+</div>
+
+<label>
+  Inflação Mensal (%):
+  <span class="tooltip" data-tooltip="Percentual médio de inflação mensal. Reduz o valor real do rendimento.">&#9432;</span>
+</label>
+<input type="number" id="inflacao" value="0">
+
+<label>
+  Duração (meses):
+  <span class="tooltip" data-tooltip="Quantidade de meses da simulação.">&#9432;</span>
+</label>
+<input type="number" id="meses" value="12">
+
+
+  <button onclick="calcular()">Comparar</button>
+  
+  
+
+  <h2 id="resultadoFinal"></h2>
+
+  <canvas id="grafico"></canvas>
+
+  <table id="tabelaResultados">
+    <thead>
+      <tr>
+        <th>Mês</th>
+        <th>Saldo C1 (real)</th>
+        <th>Saldo C2 (real)</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+  <script>
+    let grafico = null;
+
+    function calcularIR(dias, lucro) {
+      let taxa;
+      if (dias <= 180) taxa = 0.225;
+      else if (dias <= 360) taxa = 0.20;
+      else if (dias <= 720) taxa = 0.175;
+      else taxa = 0.15;
+      return lucro * taxa;
+    }
+
+    function calcular() {
+      const meses = parseInt(document.getElementById('meses').value);
+      const inflacao = parseFloat(document.getElementById('inflacao').value) / 100;
+
+      const cenario = (n) => ({
+        inicial: parseFloat(document.getElementById(`inicial${n}`).value),
+        aporte: parseFloat(document.getElementById(`aporte${n}`).value),
+        juros: parseFloat(document.getElementById(`juros${n}`).value) / 100,
+        reinvestir: parseFloat(document.getElementById(`reinvestir${n}`).value) / 100,
+        aumentoAporte: parseFloat(document.getElementById(`aumentoAporte${n}`).value) / 100,
+        retirada: parseFloat(document.getElementById(`retirada${n}`).value),
+      });
+
+      const c1 = cenario(1);
+      const c2 = cenario(2);
+
+      let saldo1 = c1.inicial, saldo2 = c2.inicial;
+      let totalAportado1 = c1.inicial, totalAportado2 = c2.inicial;
+      let labels = [], data1 = [], data2 = [];
+
+      const corpo = document.querySelector("#tabelaResultados tbody");
+      corpo.innerHTML = "";
+
+      for (let mes = 1; mes <= meses; mes++) {
+        const dias = mes * 30;
+
+        const lucro1 = saldo1 * c1.juros;
+        const ir1 = calcularIR(dias, lucro1);
+        saldo1 += c1.aporte + (lucro1 - ir1) * c1.reinvestir;
+        saldo1 -= c1.retirada;
+        saldo1 /= (1 + inflacao);
+        totalAportado1 += c1.aporte;
+
+        const lucro2 = saldo2 * c2.juros;
+        const ir2 = calcularIR(dias, lucro2);
+        saldo2 += c2.aporte + (lucro2 - ir2) * c2.reinvestir;
+        saldo2 -= c2.retirada;
+        saldo2 /= (1 + inflacao);
+        totalAportado2 += c2.aporte;
+
+        if (mes % 6 === 0) {
+          c1.aporte += c1.aporte * c1.aumentoAporte;
+          c2.aporte += c2.aporte * c2.aumentoAporte;
+        }
+
+        labels.push("Mês " + mes);
+        data1.push(saldo1.toFixed(2));
+        data2.push(saldo2.toFixed(2));
+
+        corpo.innerHTML += `
+          <tr>
+            <td>${mes}</td>
+            <td>R$ ${saldo1.toFixed(2)}</td>
+            <td>R$ ${saldo2.toFixed(2)}</td>
+          </tr>
+        `;
+      }
+
+      document.getElementById("resultadoFinal").innerText =
+        `Saldo Final: C1 = R$ ${saldo1.toFixed(2)} | C2 = R$ ${saldo2.toFixed(2)}`;
+
+      desenharGrafico(labels, data1, data2);
+    }
+
+    function desenharGrafico(labels, data1, data2) {
+      const ctx = document.getElementById("grafico").getContext("2d");
+      if (grafico) grafico.destroy();
+
+      grafico = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels,
+          datasets: [
+            {
+              label: "Cenário 1",
+              data: data1,
+              borderColor: "#4CAF50",
+              backgroundColor: "rgba(76,175,80,0.1)",
+              fill: true,
+              tension: 0.3
+            },
+            {
+              label: "Cenário 2",
+              data: data2,
+              borderColor: "#2196F3",
+              backgroundColor: "rgba(33,150,243,0.1)",
+              fill: true,
+              tension: 0.3
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          scales: {
+            y: { beginAtZero: true }
+          }
+        }
+      });
+    }
+
+    function salvarSimulacao() {
+      const sim = {
+        cenario1: {
+          inicial: parseFloat(document.getElementById('inicial1').value),
+          aporte: parseFloat(document.getElementById('aporte1').value),
+          juros: parseFloat(document.getElementById('juros1').value),
+          reinvestir: parseFloat(document.getElementById('reinvestir1').value),
+          aumentoAporte: parseFloat(document.getElementById('aumentoAporte1').value),
+          retirada: parseFloat(document.getElementById('retirada1').value)
+        },
+        cenario2: {
+          inicial: parseFloat(document.getElementById('inicial2').value),
+          aporte: parseFloat(document.getElementById('aporte2').value),
+          juros: parseFloat(document.getElementById('juros2').value),
+          reinvestir: parseFloat(document.getElementById('reinvestir2').value),
+          aumentoAporte: parseFloat(document.getElementById('aumentoAporte2').value),
+          retirada: parseFloat(document.getElementById('retirada2').value)
+        },
+        inflacao: parseFloat(document.getElementById('inflacao').value),
+        meses: parseInt(document.getElementById('meses').value)
+      };
+      const nomeArquivo = "simulacao_" + new Date().toISOString() + ".json";
+      fileDownload(JSON.stringify(sim), nomeArquivo);
+    }
+
+    function carregarSimulacao() {
+      const input = document.createElement('input');
+      input.type = 'file';
+      input.accept = '.json';
+      input.onchange = e => {
+        const reader = new FileReader();
+        reader.onload = function(event) {
+          const sim = JSON.parse(event.target.result);
+          document.getElementById('inicial1').value = sim.cenario1.inicial;
+          document.getElementById('aporte1').value = sim.cenario1.aporte;
+          document.getElementById('juros1').value = sim.cenario1.juros;
+          document.getElementById('reinvestir1').value = sim.cenario1.reinvestir;
+          document.getElementById('aumentoAporte1').value = sim.cenario1.aumentoAporte;
+          document.getElementById('retirada1').value = sim.cenario1.retirada;
+
+          document.getElementById('inicial2').value = sim.cenario2.inicial;
+          document.getElementById('aporte2').value = sim.cenario2.aporte;
+          document.getElementById('juros2').value = sim.cenario2.juros;
+          document.getElementById('reinvestir2').value = sim.cenario2.reinvestir;
+          document.getElementById('aumentoAporte2').value = sim.cenario2.aumentoAporte;
+          document.getElementById('retirada2').value = sim.cenario2.retirada;
+
+          document.getElementById('inflacao').value = sim.inflacao;
+          document.getElementById('meses').value = sim.meses;
+        };
+        reader.readAsText(e.target.files[0]);
+      };
+      input.click();
+    }
+  </script>
+</body>
+</html>
